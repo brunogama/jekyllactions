@@ -1,0 +1,57 @@
+# Setup
+title:               Foundation
+tagline:             'A collection of thougts and crazy Swift ideas'
+description:         'This is my personal website, where I share my thoughts and crazy Swift ideas.'
+url:                 https://bruno.foundation
+baseurl:             ''
+paginate:            5
+permalink:           pretty
+
+# About/contact
+author:
+  name:              Bruno da Gama Porciuncula
+  url:               https://twitter.com/brunogama
+  email:             hi@bruno.foundation
+
+# Gems
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Custom vars
+version:             1.1.0
+google_analytics_id: #UA-XXXX-Y
+
+# Build settings
+markdown:            kramdown
+highlighter:         rouge
+excerpt_separator:   <!--more-->
+future:              false
+show_drafts:         false
+
+# Defaults - front matter defaults for different types of content
+defaults:
+  - scope:
+      path:          ""
+      type:          "posts"
+    values:
+      layout:        "post"
+      comments:      false
+  - scope:
+      path:          ""
+      type:          "pages"
+    values:
+      layout:        "page"
+
+# Exclude from processing
+exclude:
+  - .git/
+  - .github/
+  - node_modules/
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - LICENSE.md

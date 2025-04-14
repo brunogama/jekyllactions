@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Foundation</title>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2025-04-13T20:47:03-03:00</updated>
+ <id>http://localhost:4000</id>
+ <author>
+   <name>Bruno da Gama Porciuncula</name>
+   <email>hi@bruno.foundation</email>
+ </author>
+
+ 
+ <entry>
+   <title>The Box Pattern: A Deep Dive into Swift's Hidden Gem</title>
+   <link href="http://localhost:4000/swift/programming/2025/04/13/the-box/"/>
+   <updated>2025-04-13T00:00:00-03:00</updated>
+   <id>http://localhost:4000/swift/programming/2025/04/13/the-box</id>
+   <content type="html">&lt;p align=&quot;center&quot; style=&quot;width: 100%;&quot;&gt;
+  &lt;img src=&quot;/public/img/box.webp&quot; alt=&quot;Dick In The Box&quot; style=&quot;width: 100%; height: auto;&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;So, I think everybody has occasionally used this kind of type. It’s so old that we can trace its existence back to the C++ and Java eras. A box type refers to a container (or a wrapper, if you prefer) that holds a value indirectly, typically by storing a pointer or a reference to a value.&lt;/p&gt;
+
+&lt;p&gt;This clever idea solved a problem in reference vs. value type semantics and immutable state. It’s true that it also saves us when we need to deal with heterogeneous types in vectors or arrays. One use case of Boxes is to store value types inside of reference types, allowing us to mutate the state of the stored type (call by semantics). So box types allow us to mutate state via interaction for both types described previously.&lt;/p&gt;
+
+&lt;p&gt;Box types bridge the gap between value semantics (copying data on assignment) and reference semantics (copying references so multiple variables share the same data). Historically, Lisp and Algol introduced “boxes” to enable assignment and references in primarily value-semantic languages, letting a function modify a caller’s variable by passing a pointer-like container. In Scheme and Racket, for example, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;box(val)&lt;/code&gt; explicitly wraps a value for mutability, with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unbox(box)&lt;/code&gt; to read and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;set-box!&lt;/code&gt; to update. This design simulates pass-by-reference without requiring pervasive reference semantics, beneficial for controlled mutation in an otherwise functional ecosystem.&lt;/p&gt;
+
+&lt;h2 id=&quot;pitfalls-anti-patterns-and-alternatives-in-swift&quot;&gt;Pitfalls, Anti-Patterns, and Alternatives in Swift&lt;/h2&gt;
+
+&lt;p&gt;While box types are powerful, there are some pitfalls and alternatives to consider:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Overusing Reference Semantics&lt;/strong&gt;: One must be cautious not to abuse boxes in a way that undermines Swift’s value semantics advantages. Value types help local reasoning (you know that modifying one copy won’t affect another). If you start wrapping many things in boxes to share state, you can end up with a more complex program where changes in one place have far-reaching effects (aliasing everywhere). This can lead to bugs similar to those in purely reference-based languages.&lt;/p&gt;
+
+    &lt;p&gt;&lt;em&gt;Anti-pattern&lt;/em&gt;: wrapping every model in a Box to avoid copying or to make everything mutable. Instead, prefer value semantics unless you truly need sharing. Use boxes intentionally and document their usage (so it’s clear that a particular property is a shared reference).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Memory and Performance&lt;/strong&gt;: Each box is a heap allocation. For small values, allocating a box can be much slower than just copying the value. For example, an Int is 8 bytes and extremely fast to copy; boxing it requires a heap allocation (which might be ~16-24 bytes overhead plus the 8 bytes, and a potential cache miss to dereference). So if you put many small values in boxes for no good reason, you could hurt performance and increase heap fragmentation. Swift’s optimizer can sometimes stack-promote small objects (escape analysis), but you shouldn’t rely on that. So, use boxes only when needed. In high-performance code, one often prefers value types and avoids the heap where possible.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Unintended Retention and Leaks&lt;/strong&gt;: Because a box is a reference, it extends the lifetime of the value until the box is deallocated. This can sometimes inadvertently cause memory leaks or retain cycles. For instance, if an ObservableBox’s listener closure captures the box itself (directly or indirectly), you can form a retain cycle (box holds listener -&amp;gt; listener captures box). In our earlier ObservableBox example, we might use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[unowned self]&lt;/code&gt; in the closure if it refers to the box, to break such a cycle. Always be mindful of reference cycles when you have closures or multiple objects referring to each other. Using weak references inside boxes (if the box holds an object) is an option to prevent strong cycles, with the outside world.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Alternatives – Property Wrappers and Specialized Containers&lt;/strong&gt;: Before reaching for a generic Box class in Swift, consider if a higher-level construct exists. Property Wrappers can often encapsulate a pattern more cleanly. For example, instead of manually using a Box for state, we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@State&lt;/code&gt;. Instead of a Box for a weak reference, some use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@Weak var foo = object&lt;/code&gt;. You can even make your own property wrapper that uses a box internally but presents a nicer API. Another alternative for observable state is to use Combine’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@Published&lt;/code&gt; on a class property or Combine subjects externally. Combine’s subjects (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PassthroughSubject&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CurrentValueSubject&lt;/code&gt;) are thread-safe and come with a well-defined subscriber model, which might be preferable to a homemade Box when things get more complex (e.g., needing to handle threading or multiple subscribers with completion, etc.). With Swift’s new concurrency, you might also consider an Actor to isolate state instead of a Box – an actor can hold a value, and you can query or update it asynchronously, ensuring thread safety without manual locks or sendable annotations.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Standard Library or Community Implementations&lt;/strong&gt;: Although trivial to implement, it’s worth knowing if others have already solved your problem. For weak references, there are packages (like one simply called “Weak”) that provide a Box class for weakly holding a value. For type erasure, Swift’s standard library provides &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AnySequence&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AnyCollection&lt;/code&gt;, etc., so you might not need to implement an AnyBox yourself unless it’s a very custom protocol. Always weigh adding yet another class with all the reference semantics versus using language features (like inout for passing by reference temporarily, or closure capturing, which might be simpler).&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In Swift’s value-oriented world, box types are a valuable escape hatch to get reference semantics when necessary. They underpin many important patterns (from CoW optimizations to UI state management). Understanding the design trade-offs – when to use a box vs. when to stick with value types or use a higher-level abstraction – is crucial. Use box types to encapsulate mutable or shared states in a controlled way, and you’ll get the benefits of indirection and flexibility. But avoid turning your codebase into an overly reference-ridden design without reason, as that can negate some of Swift’s safety and clarity gains.&lt;/p&gt;
+
+&lt;p&gt;In conclusion, box types are pretty cool because they allow us, the developers, to change values or references through indirection. From their origins in enabling reference semantics in languages, to practical uses in decoupling components and managing state, they provide a simple yet profound tool. Different languages offer different idioms – be it a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Box&amp;lt;T&amp;gt;&lt;/code&gt; class in Swift, smart pointers in C++, or auto-boxed wrapper objects in Java – but they all serve the purpose of giving data an identity and life beyond a single scope or value copy. By using box types judiciously, developers can achieve patterns like observable properties, interior mutability in immutable contexts, and performance optimizations, all while being mindful of the complexity that reference semantics introduces. The key is recognizing those scenarios where a box is the right tool and implementing it in the idiomatic way the given language expects. With the guidance and examples above, one can leverage box types to write flexible and robust code across various programming paradigms.&lt;/p&gt;
+
+&lt;h2 id=&quot;parameter-packs-and-heterogeneous-boxes&quot;&gt;Parameter Packs and Heterogeneous Boxes&lt;/h2&gt;
+
+&lt;p&gt;But what are the reasons for this post?&lt;/p&gt;
+
+&lt;p&gt;Well, Swift 5.9 introduced a new feature called Parameter Packs. Parameter Packs are really powerful and useful. And somehow they introduced a new kind of box I like to call the “heterogeneous box.” For people who are not familiar with the concept of Parameter Packs, they work like variadic generics. Let’s see the example below:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;packs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;What does this sample do? Well, it basically returns a tuple of any size for the parameters passed to the function. Let’s say you use the function:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;packs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// Returns ()&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;packs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leonard Nimoy&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Returns (&quot;Leonard Nimoy&quot;, 1, true)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Okay, but tuples are kind of a weird type to deal with. What else can we do?&lt;/p&gt;
+
+&lt;p&gt;Let’s see this sample from WWDC:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;item1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;item2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;item3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can also iterate in value packs like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;evaluate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nf&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;evaluate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Okay, but where is the new fancy HeterogeneousBox? Let’s check it out:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;HeterogeneousBox&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;private(set)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    &lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    
+    &lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;box&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;HeterogeneousBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Leonard Nimoy&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;3.14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Prints  1, &quot;Leonard Nimoy&quot;, 3.14, true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is essentially the same concept of boxes discussed earlier, but there are a few gotchas when dealing with Parameter Packs and value packs. For instance, for the property value, you can’t access the first parameter using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;value.0&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;However, there are some tricks that can make this possible. I believe in Swift 5.4 Apple introduced a feature called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@dynamicMemberLookup&lt;/code&gt; that allows one to look for properties or keypaths at runtime; it was extremely useful when Apple was working with Google and TensorFlow. By adding this annotation, we’re able to access &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tuple.0&lt;/code&gt; (if it exists, remembering it is runtime). Here is the implementation:&lt;/p&gt;
+
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;@dynamicMemberLookup&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;HeterogeneousBox&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;private(set)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    
+    &lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    
+    &lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tuple&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    
+    &lt;span class=&quot;c1&quot;&gt;// By using WritableKeyPath we can access the value of the tuple and set a new one (of the same type)&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;subscript&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;dynamicMember&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;keyPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;WritableKeyPath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Output&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;keyPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;keyPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newValue&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    
+&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;box&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;HeterogeneousBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Leonard Nimoy&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;3.14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Prints  1, &quot;Leonard Nimoy&quot;, 3.14, true&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;box&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Prints  2, &quot;Leonard Nimoy&quot;, 3.14, true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I’ve created a repository with all the things proposed in this post and I’ve also implemented some protocol conformances and other features.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/brunogama/HeterogeneousBox&quot;&gt;&lt;strong&gt;HeterogeneousBox&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Other Experiments&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/brunogama/TypeInferredFactory&quot;&gt;&lt;strong&gt;TypeInferredFactory&lt;/strong&gt;&lt;/a&gt; - I was attempting to create an ultra-generic factory pattern using this feature and macros, but I didn’t have time to finish it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Dealing with Swift Parameter Packs is quite an adventure. I propose you check out the repository of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HeterogeneousBox&lt;/code&gt; and check the source code to see what kind of madness is required to achieve some things. It was quite a ride. If you are interested in this topic or want to give any feedback about the code in the repositories, feel free to contact me or open a PR on GitHub.&lt;/p&gt;
+</content>
+ </entry>
+ 
+
+</feed>
