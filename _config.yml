@@ -3,7 +3,7 @@ title:               Foundation
 tagline:             'A collection of thougts and crazy Swift ideas'
 description:         'This is my personal website, where I share my thoughts and crazy Swift ideas.'
 url:                 https://bruno.foundation
-baseurl:             ''
+baseurl:             '/lanyon'
 paginate:            5
 permalink:           pretty
 
@@ -55,3 +55,8 @@ exclude:
   - Gemfile.lock
   - README.md
   - LICENSE.md
+
+
+# If you're using the Lanyon theme
+theme: jekyll-theme-lanyon  # Or remote_theme if using a GitHub-hosted theme
+Step 5: Commit and Push Changes
