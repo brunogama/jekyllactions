@@ -1,21 +1,23 @@
 name: Build and deploy Jekyll site to GitHub Pages
-
 on:
   push:
     branches:
       - main  # or master, use your default branch name
-
 jobs:
   github-pages:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       
-      # Setup Ruby
+      # Setup Ruby with improved caching
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1' # Choose your Ruby version
+          ruby-version: '3.1.7' # Use a specific patch version for consistency
           bundler-cache: true
+      
+      # Allow bundler to update Gemfile.lock if needed
+      - name: Configure Bundler
+        run: bundle config set --local frozen false
       
       # Install dependencies & build site
       - name: Build with Jekyll
@@ -31,3 +33,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
+          # Optional: Enable the following for custom domain support
+          # cname: yourdomain.com
