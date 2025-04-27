@@ -7,10 +7,14 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: write
-  pages: write
-  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -18,39 +22,40 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
+      
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3.0'
           bundler-cache: true
-
+      
       - name: Install dependencies
         run: bundle install
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: ${{ runner.os }}-gems-
-
+      
       - name: Build with Jekyll
         run: bundle exec jekyll build
-
-      - name: Deploy to External Repository
+        env:
+          JEKYLL_ENV: production
+      
+      - name: Deploy to GitHub Pages
         if: github.event_name != 'pull_request'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          external_repository: brunogama/brunogama.github.io
-          publish_branch: main
-          publish_dir: ./_site
-          cname: bruno.foundation
-
-env:
-  JEKYLL_ENV: production
-
-concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+        run: |
+          # Set up credentials for external repository
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Create CNAME file
+          echo "bruno.foundation" > _site/CNAME
+          
+          # Go to build directory
+          cd _site
+          
+          # Initialize git repo in output directory
+          git init
+          git add -A
+          git commit -m "Deploy Jekyll site from Actions"
+          
+          # Force push to destination repository using GITHUB_TOKEN
+          git push -f https://${{ secrets.GH_PAT }}@github.com/brunogama/brunogama.github.io.git main
+        env:
+          JEKYLL_ENV: production
