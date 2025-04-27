@@ -314,16 +314,7 @@ PLATFORMS
 
 DEPENDENCIES
   github-pages
-  jekyll-feed
-  jekyll-paginate
   jekyll-remote-theme
-  jekyll-seo-tag
-  jekyll-sitemap
-  kramdown-parser-gfm
-  tzinfo (~> 1.2)
-  tzinfo-data
-  wdm (~> 0.1.1)
-  webrick
 
 BUNDLED WITH
    2.6.8

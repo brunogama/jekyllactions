@@ -2,55 +2,39 @@ name: Build and deploy Jekyll site to GitHub Pages
 
 on:
   push:
-    branches:
-      - main  # or master, whichever is your default branch
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
-# Permissions explanation:
-# - contents: write → Required to push built site to gh-pages branch
-# - pages: write → Required for GitHub Pages configuration
-# - id-token: write → Retained for potential future API-based deployments
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# Prevent parallel builds to avoid conflicts during deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
-  # Combined job for build and deployment to match repository configuration
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          # Using a Ruby version compatible with GitHub Pages environment
           ruby-version: '3.3.0'
           bundler-cache: true
-        
+
       - name: Install dependencies
-        run: |
-          bundle config set --local path vendor/bundle
-          bundle install
-        
-      - name: Build Jekyll site
+        run: bundle install
+
+      - name: Build with Jekyll
         run: bundle exec jekyll build
-        env:
-          JEKYLL_ENV: production
-        
-      # Using branch-based deployment to match repository configuration
-      # This action pushes the built site to the gh-pages branch which is
-      # what your GitHub Pages settings expect as the publishing source
-      - name: Deploy to gh-pages branch
+
+      - name: Deploy to GitHub Pages
+        if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          cname: bruno.foundation  # Preserves your custom domain
-          force_orphan: true  # Creates a clean gh-pages branch each time
+          cname: bruno.foundation

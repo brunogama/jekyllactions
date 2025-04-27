@@ -64,4 +64,10 @@ exclude:
 
 # If you're using the Lanyon theme
 # theme: jekyll-theme-lanyon  # This theme is not supported by GitHub Pages
-remote_theme: poole/lanyon  # Use remote_theme instead
+# With these lines
+remote_theme: poole/lanyon
+
+# Make sure to add this to your plugins section
+plugins:
+  - jekyll-remote-theme
+  # other plugins you're using
