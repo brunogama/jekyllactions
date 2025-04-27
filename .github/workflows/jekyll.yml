@@ -1,37 +1,52 @@
 name: Build and deploy Jekyll site to GitHub Pages
+
 on:
   push:
     branches:
       - main  # or master, use your default branch name
+  pull_request:
+    branches:
+      - main  # or master, use your default branch name
+
 jobs:
   github-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
-      # Setup Ruby with improved caching
-      - uses: ruby/setup-ruby@v1
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1.7' # Use a specific patch version for consistency
-          bundler-cache: true
-      
-      # Allow bundler to update Gemfile.lock if needed
+          ruby-version: '3.3.6'  # Match your .ruby-version file
+          bundler-cache: false  # Set to true after first successful run
+
       - name: Configure Bundler
         run: bundle config set --local frozen false
-      
-      # Install dependencies & build site
-      - name: Build with Jekyll
-        run: |
-          bundle install
-          bundle exec jekyll build
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Build site
+        run: bundle exec jekyll build
         env:
           JEKYLL_ENV: production
-      
-      # Deploy to GitHub Pages
-      - name: Deploy
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          # Optional: Enable the following for custom domain support
-          # cname: yourdomain.com
+          cname: bruno.foundation  # Optional: Use your custom domain
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy Jekyll site to GitHub Pages'
+          # Optional: Enable if you want to keep the entire history
+          # force_orphan: false 
+
+      - name: Show build logs on failure
+        if: ${{ failure() }}
+        run: |
+          echo "=== Jekyll Build Logs ==="
+          cat /tmp/jekyll-build.log || echo "No build logs found"
