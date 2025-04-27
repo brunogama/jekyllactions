@@ -44,18 +44,32 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           
+          # Debug info
+          echo "Deploying to brunogama.github.io repository..."
+          
           # Create CNAME file
           echo "bruno.foundation" > _site/CNAME
           
           # Go to build directory
           cd _site
           
+          # List contents to verify
+          echo "Site directory contents:"
+          ls -la
+          
           # Initialize git repo in output directory with main as default branch
           git init -b main
-          git add -A
-          git commit -m "Deploy Jekyll site from Actions"
           
-          # Force push to destination repository using token
-          git push -f https://${{ secrets.GH_PAT }}@github.com/brunogama/brunogama.github.io.git main
+          # Debug - check remote
+          git remote -v
+          
+          git add -A
+          git commit -m "Deploy Jekyll site from Actions at $(date)"
+          
+          # Try alternative authentication method
+          echo "Pushing to destination repository..."
+          git push -vf https://x-access-token:${{ secrets.GH_PAT }}@github.com/brunogama/brunogama.github.io.git main
+          
+          echo "Deployment complete!"
         env:
           JEKYLL_ENV: production

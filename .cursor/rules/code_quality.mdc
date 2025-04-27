@@ -1,0 +1,624 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# SOLID Principles and Object Calisthenics
+
+## SOLID Principles
+
+- **Single Responsibility Principle (SRP)**
+  - Each class/function should have only one reason to change
+  - Functions should do exactly one thing, and do it well
+  ```swift
+  // ❌ DON'T: Multiple responsibilities in one function
+  func validateAndSaveUser(user: User) {
+      // Validate email
+      if !user.email.isValidEmail() {
+          throw ValidationError.invalidEmail
+      }
+      // Save to database
+      database.save(user)
+  }
+
+  // ✅ DO: Split into separate functions
+  func validateUser(user: User) throws {
+      if !user.email.isValidEmail() {
+          throw ValidationError.invalidEmail
+      }
+  }
+
+  func saveUser(user: User) {
+      database.save(user)
+  }
+  ```
+
+- **Open/Closed Principle (OCP)**
+  - Software entities should be open for extension but closed for modification
+  - Use protocols/interfaces and inheritance instead of modifying existing code
+  ```swift
+  // ✅ DO: Use protocols for extensibility
+  protocol PaymentProcessor {
+      func process(payment: Payment)
+  }
+
+  class CreditCardProcessor: PaymentProcessor {
+      func process(payment: Payment) {
+          // Process credit card payment
+      }
+  }
+
+  class PayPalProcessor: PaymentProcessor {
+      func process(payment: Payment) {
+          // Process PayPal payment
+      }
+  }
+  ```
+
+- **Liskov Substitution Principle (LSP)**
+  - Subtypes must be substitutable for their base types without altering program correctness
+  - Derived classes should extend, not replace, the behavior of base classes
+  ```swift
+  // ❌ DON'T: Violate LSP
+  class Rectangle {
+      var width: Int
+      var height: Int
+
+      func setWidth(_ width: Int) { self.width = width }
+      func setHeight(_ height: Int) { self.height = height }
+  }
+
+  class Square: Rectangle {
+      override func setWidth(_ width: Int) {
+          self.width = width
+          self.height = width // Changing behavior unexpectedly
+      }
+  }
+
+  // ✅ DO: Use composition or interfaces
+  protocol Shape {
+      func area() -> Int
+  }
+
+  class Rectangle: Shape {
+      let width: Int
+      let height: Int
+
+      func area() -> Int {
+          return width * height
+      }
+  }
+
+  class Square: Shape {
+      let side: Int
+
+      func area() -> Int {
+          return side * side
+      }
+  }
+  ```
+
+- **Interface Segregation Principle (ISP)**
+  - No client should be forced to depend on methods it does not use
+  - Create specific interfaces rather than general-purpose ones
+  ```swift
+  // ❌ DON'T: Large, general-purpose interfaces
+  protocol Worker {
+      func work()
+      func eat()
+      func sleep()
+  }
+
+  // ✅ DO: Segregated interfaces
+  protocol Workable {
+      func work()
+  }
+
+  protocol Eatable {
+      func eat()
+  }
+
+  protocol Sleepable {
+      func sleep()
+  }
+
+  class HumanWorker: Workable, Eatable, Sleepable {
+      func work() { /* ... */ }
+      func eat() { /* ... */ }
+      func sleep() { /* ... */ }
+  }
+
+  class RobotWorker: Workable {
+      func work() { /* ... */ }
+  }
+  ```
+
+- **Dependency Inversion Principle (DIP)**
+  - High-level modules should not depend on low-level modules; both should depend on abstractions
+  - Abstractions should not depend on details; details should depend on abstractions
+  ```swift
+  // ❌ DON'T: Depend on concrete implementations
+  class UserService {
+      let sqlDatabase = SQLDatabase()
+
+      func saveUser(user: User) {
+          sqlDatabase.save(user)
+      }
+  }
+
+  // ✅ DO: Depend on abstractions
+  protocol Database {
+      func save<T>(_ item: T)
+  }
+
+  class UserService {
+      let database: Database
+
+      init(database: Database) {
+          self.database = database
+      }
+
+      func saveUser(user: User) {
+          database.save(user)
+      }
+  }
+  ```
+
+## Object Calisthenics
+
+- **One Level of Indentation per Method**
+  - Limit each method to one level of indentation to improve readability
+  - Extract code blocks to separate methods when needed
+  ```swift
+  // ❌ DON'T: Multiple levels of indentation
+  func processOrders(orders: [Order]) {
+      for order in orders {
+          if order.isValid {
+              for item in order.items {
+                  if item.isInStock {
+                      // Process item
+                  }
+              }
+          }
+      }
+  }
+
+  // ✅ DO: Extract to separate methods
+  func processOrders(orders: [Order]) {
+      for order in orders {
+          processValidOrder(order)
+      }
+  }
+
+  func processValidOrder(_ order: Order) {
+      guard order.isValid else { return }
+      processOrderItems(order.items)
+  }
+
+  func processOrderItems(_ items: [OrderItem]) {
+      for item in items {
+          processInStockItem(item)
+      }
+  }
+
+  func processInStockItem(_ item: OrderItem) {
+      guard item.isInStock else { return }
+      // Process item
+  }
+  ```
+
+- **Don't Use ELSE**
+  - Avoid else branches to simplify conditional logic
+  - Use early returns, guard statements, or polymorphism instead
+  ```swift
+  // ❌ DON'T: Use else branches
+  func calculateDiscount(user: User) -> Double {
+      if user.isPremium {
+          return 0.2
+      } else {
+          if user.isRegular {
+              return 0.1
+          } else {
+              return 0
+          }
+      }
+  }
+
+  // ✅ DO: Use early returns
+  func calculateDiscount(user: User) -> Double {
+      if user.isPremium {
+          return 0.2
+      }
+
+      if user.isRegular {
+          return 0.1
+      }
+
+      return 0
+  }
+
+  // ✅ Even better: Use guard statements
+  func calculateDiscount(user: User) -> Double {
+      guard user.isPremium else {
+          guard user.isRegular else {
+              return 0
+          }
+          return 0.1
+      }
+      return 0.2
+  }
+  ```
+
+- **Wrap Primitives and Strings**
+  - Don't expose primitive types directly; wrap them in domain objects
+  - This adds context and type safety to your code
+  ```swift
+  // ❌ DON'T: Use primitives directly
+  class User {
+      var email: String
+      var age: Int
+  }
+
+  // ✅ DO: Wrap in value objects
+  struct Email {
+      let value: String
+
+      init?(_ email: String) {
+          guard email.isValidEmail() else { return nil }
+          self.value = email
+      }
+  }
+
+  struct Age {
+      let value: Int
+
+      init?(_ age: Int) {
+          guard age > 0 && age < 150 else { return nil }
+          self.value = age
+      }
+  }
+
+  class User {
+      var email: Email
+      var age: Age
+  }
+  ```
+
+- **First Class Collections**
+  - Wrap collections in their own dedicated classes with behavior
+  - Don't use raw arrays or dictionaries directly
+  ```swift
+  // ❌ DON'T: Use raw collections
+  class ShoppingCart {
+      var items: [Item] = []
+
+      func totalPrice() -> Double {
+          return items.reduce(0) { $0 + $1.price }
+      }
+  }
+
+  // ✅ DO: Create dedicated collection classes
+  class ItemCollection {
+      private var items: [Item] = []
+
+      func add(_ item: Item) {
+          items.append(item)
+      }
+
+      func remove(_ item: Item) {
+          items.removeAll { $0.id == item.id }
+      }
+
+      func totalPrice() -> Double {
+          return items.reduce(0) { $0 + $1.price }
+      }
+
+      var count: Int {
+          return items.count
+      }
+  }
+
+  class ShoppingCart {
+      private let items = ItemCollection()
+
+      func add(_ item: Item) {
+          items.add(item)
+      }
+
+      func totalPrice() -> Double {
+          return items.totalPrice()
+      }
+  }
+  ```
+
+- **One Dot Per Line**
+  - Avoid chaining method calls; each line should have at most one dot
+  - This reduces coupling and improves readability
+  ```swift
+  // ❌ DON'T: Chain method calls
+  let username = user.getProfile().getSettings().getUsername()
+
+  // ✅ DO: One dot per line
+  let profile = user.getProfile()
+  let settings = profile.getSettings()
+  let username = settings.getUsername()
+  ```
+
+- **Don't Abbreviate**
+  - Use clear, descriptive names for variables, functions, and classes
+  - Avoid abbreviations that might be unclear to others
+  ```swift
+  // ❌ DON'T: Use abbreviations
+  func calcTtlPrc(prds: [Prd]) -> Dbl {
+      var ttl: Dbl = 0
+      for p in prds {
+          ttl += p.prc
+      }
+      return ttl
+  }
+
+  // ✅ DO: Use descriptive names
+  func calculateTotalPrice(products: [Product]) -> Double {
+      var total: Double = 0
+      for product in products {
+          total += product.price
+      }
+      return total
+  }
+  ```
+
+- **Keep Entities Small**
+  - Classes should be small (max 50 lines)
+  - Methods should be small (max 10 lines)
+  - Packages should be small (max 10 classes)
+  ```swift
+  // ❌ DON'T: Create large classes with many responsibilities
+  class UserManager {
+      // 200+ lines of code with multiple responsibilities
+  }
+
+  // ✅ DO: Break into smaller, focused classes
+  class UserAuthenticator {
+      // 30 lines for authentication logic
+  }
+
+  class UserProfileManager {
+      // 40 lines for profile management
+  }
+
+  class UserPreferencesManager {
+      // 25 lines for preference management
+  }
+  ```
+
+- **No Classes with More Than Two Instance Variables**
+  - Limit the number of instance variables to reduce complexity
+  - Use composition to manage more complex objects
+  ```swift
+  // ❌ DON'T: Many instance variables
+  class Customer {
+      var name: String
+      var email: String
+      var address: String
+      var phone: String
+      var birthDate: Date
+  }
+
+  // ✅ DO: Use composition
+  class Customer {
+      var identity: PersonalIdentity
+      var contactInfo: ContactInformation
+  }
+
+  class PersonalIdentity {
+      var name: String
+      var birthDate: Date
+  }
+
+  class ContactInformation {
+      var email: String
+      var address: String
+      var phone: String
+  }
+  ```
+
+- **No Getters/Setters/Properties**
+  - Tell, don't ask - objects should expose behavior, not state
+  - Use methods that perform operations rather than get/set properties
+  ```swift
+  // ❌ DON'T: Expose state through getters/setters
+  class BankAccount {
+      private var balance: Double
+
+      func getBalance() -> Double {
+          return balance
+      }
+
+      func setBalance(_ newBalance: Double) {
+          balance = newBalance
+      }
+  }
+
+  // Outside code:
+  let newBalance = account.getBalance() + amount
+  account.setBalance(newBalance)
+
+  // ✅ DO: Expose behavior instead
+  class BankAccount {
+      private var balance: Double
+
+      func deposit(_ amount: Double) {
+          guard amount > 0 else { return }
+          balance += amount
+      }
+
+      func withdraw(_ amount: Double) -> Bool {
+          guard amount > 0 && balance >= amount else {
+              return false
+          }
+          balance -= amount
+          return true
+      }
+  }
+
+  // Outside code:
+  account.deposit(amount)
+  ```
+
+Remember: These principles are guidelines, not strict rules. Apply them thoughtfully based on the context and requirements of your project.
+
+## Applying Object Calisthenics to Value Types
+
+Object Calisthenics principles can be adapted for value types (like Swift structs):
+
+- **Small, Focused Value Types**
+  - Keep structs small and focused on a single concept
+  - Prefer multiple small structs over large ones with many properties
+  ```swift
+  // ❌ DON'T: Large struct with many properties
+  struct UserData {
+      let id: UUID
+      let name: String
+      let email: String
+      let address: String
+      let birthDate: Date
+      let preferences: [String: Bool]
+      let lastLoginDate: Date
+  }
+
+  // ✅ DO: Split into smaller, focused structs
+  struct UserIdentity {
+      let id: UUID
+      let name: String
+  }
+
+  struct UserContact {
+      let email: String
+      let address: String
+  }
+
+  struct UserPreferences {
+      let settings: [String: Bool]
+  }
+
+  struct UserActivity {
+      let lastLoginDate: Date
+  }
+  ```
+
+- **Immutability First**
+  - Prefer immutable properties (let) over mutable ones (var)
+  - Use transformation methods that return new instances instead of mutating existing ones
+  ```swift
+  // ❌ DON'T: Mutate properties directly
+  struct Counter {
+      var count: Int = 0
+
+      mutating func increment() {
+          count += 1
+      }
+  }
+
+  // ✅ DO: Return new instances with transformed state
+  struct Counter {
+      let count: Int
+
+      init(count: Int = 0) {
+          self.count = count
+      }
+
+      func incremented() -> Counter {
+          return Counter(count: count + 1)
+      }
+  }
+  ```
+
+- **Behavior Over Properties**
+  - Even with value types, expose behavior rather than just data
+  - Encapsulate domain logic in methods rather than leaving it to clients
+  ```swift
+  // ❌ DON'T: Just expose data
+  struct Money {
+      let amount: Decimal
+      let currency: String
+  }
+
+  // Client code has to handle logic
+  let total = product.price.amount * quantity
+
+  // ✅ DO: Encapsulate behavior in methods
+  struct Money {
+      let amount: Decimal
+      let currency: String
+
+      func multiply(by factor: Decimal) -> Money {
+          return Money(amount: amount * factor, currency: currency)
+      }
+
+      func add(_ other: Money) throws -> Money {
+          guard currency == other.currency else {
+              throw MoneyError.currencyMismatch
+          }
+          return Money(amount: amount + other.amount, currency: currency)
+      }
+  }
+
+  // Client code uses behavior
+  let total = try product.price.multiply(by: Decimal(quantity))
+  ```
+
+- **Value Object Patterns**
+  - Use factory methods for complex initialization logic
+  - Implement value equality (Equatable)
+  - Add validation at initialization time
+  ```swift
+  struct EmailAddress: Equatable {
+      let value: String
+
+      // Factory method instead of initializer
+      static func create(_ email: String) -> Result<EmailAddress, ValidationError> {
+          guard email.isValidEmail() else {
+              return .failure(.invalidFormat)
+          }
+          return .success(EmailAddress(value: email))
+      }
+
+      // Private initializer enforces using factory method
+      private init(value: String) {
+          self.value = value
+      }
+  }
+  ```
+
+- **Pure Functions**
+  - Prefer functions with no side effects
+  - Input → Output transformations without modifying state
+  ```swift
+  // ❌ DON'T: Functions with side effects
+  func processPayment(payment: Payment) {
+      apiClient.sendPayment(payment)
+      database.saveTransaction(payment)
+      analytics.trackPayment(payment)
+  }
+
+  // ✅ DO: Pure functions that return results
+  func validatePayment(payment: Payment) -> ValidationResult {
+      // Validate and return result without side effects
+      return payment.amount > 0 ? .valid : .invalid(reason: "Amount must be positive")
+  }
+
+  // Side effects are explicit in return type
+  func processPayment(payment: Payment) -> PaymentResult {
+      // Return result containing success/failure and any needed data
+      // Caller decides what to do with result
+      return paymentGateway.process(payment)
+  }
+  ```
+
+Remember: Value types and reference types each have appropriate use cases. Value types are excellent for representing immutable data and simple domain concepts, while reference types work better for entities with identity and complex, stateful behavior.
+
+
+Always prefer shorter code. Functions should do only one thing. Prefer eaarly rerturns, code should be defensive test for faIures first. Success should be the last return. Functions should have at max 1 indentatio, if neeed more create another function, write your code using Test-Driven Development.
+
+
+If tests fail reasoninig first why it is happening using sequential reasoning mcp. If no other solution was found search the internet using perplexity, brave research and read the Docs.

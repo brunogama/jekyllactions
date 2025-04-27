@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+- For commit messages, use Conventional Commits.

@@ -1,0 +1,6 @@
+---
+description:
+globs: *.swift"
+alwaysApply: false
+---
+- Don't fix linting warnings

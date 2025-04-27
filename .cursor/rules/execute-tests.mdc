@@ -1,0 +1,14 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+---
+description: Execute tests before concluding the tassk
+globs: *.swift
+alwaysApply: true
+---
+
+# Execute tests before concluding the tassk
+
+- Every time before the LLM will say it's finished it's work, execute the target `test-all` in the Makefile to make if there is errors.
