@@ -1,0 +1,10 @@
+node_modules
+.git
+.next
+dist
+out
+.cache
+coverage
+*.log
+.env*
+tasks/ 
