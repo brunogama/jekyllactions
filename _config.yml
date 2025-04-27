@@ -23,6 +23,8 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-remote-theme
+  - jekyll-feed
+
 
 # Custom vars
 version:             1.1.0
