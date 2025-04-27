@@ -7,6 +7,9 @@ baseurl:             ''
 paginate:            5
 permalink:           pretty
 
+# Force rebuild timestamp to prevent caching
+rebuild_timestamp:   <%= Time.now.to_i %> # Updated <%= Time.now %>
+
 # About/contact
 author:
   name:              Bruno da Gama Porciuncula
