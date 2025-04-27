@@ -50,12 +50,12 @@ jobs:
           # Go to build directory
           cd _site
           
-          # Initialize git repo in output directory
-          git init
+          # Initialize git repo in output directory with main as default branch
+          git init -b main
           git add -A
           git commit -m "Deploy Jekyll site from Actions"
           
-          # Force push to destination repository using GITHUB_TOKEN
+          # Force push to destination repository using token
           git push -f https://${{ secrets.GH_PAT }}@github.com/brunogama/brunogama.github.io.git main
         env:
           JEKYLL_ENV: production
