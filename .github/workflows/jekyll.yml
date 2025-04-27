@@ -1,52 +1,51 @@
-name: Build and deploy Jekyll site to GitHub Pages
+name: Deploy Jekyll site to Pages
 
 on:
   push:
-    branches:
-      - main  # or master, use your default branch name
-  pull_request:
-    branches:
-      - main  # or master, use your default branch name
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  github-pages:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
+      - name: Checkout
+        uses: actions/checkout@v4
+      
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.6'  # Match your .ruby-version file
-          bundler-cache: false  # Set to true after first successful run
-
-      - name: Configure Bundler
-        run: bundle config set --local frozen false
-
-      - name: Install dependencies
-        run: bundle install
-
-      - name: Build site
-        run: bundle exec jekyll build
+          ruby-version: '3.3.6'
+          bundler-cache: true
+      
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+      
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          cname: bruno.foundation  # Optional: Use your custom domain
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy Jekyll site to GitHub Pages'
-          # Optional: Enable if you want to keep the entire history
-          # force_orphan: false 
-
-      - name: Show build logs on failure
-        if: ${{ failure() }}
-        run: |
-          echo "=== Jekyll Build Logs ==="
-          cat /tmp/jekyll-build.log || echo "No build logs found"
+        id: deployment
+        uses: actions/deploy-pages@v4
