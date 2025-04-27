@@ -42,14 +42,11 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
           external_repository: brunogama/brunogama.github.io
           publish_branch: main
           publish_dir: ./_site
           cname: bruno.foundation
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          full_commit_message: ${{ github.event.head_commit.message }}
 
 env:
   JEKYLL_ENV: production
