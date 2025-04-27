@@ -23,6 +23,7 @@ plugins:
 # Custom vars
 version:             1.1.0
 google_analytics_id: G-MJ3E2VC6SJ
+rebuild:             <%= Time.now.to_i %>
 
 # Build settings
 markdown:            kramdown
