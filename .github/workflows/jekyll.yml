@@ -28,6 +28,13 @@ jobs:
       - name: Install dependencies
         run: bundle install
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: ${{ runner.os }}-gems-
+
       - name: Build with Jekyll
         run: bundle exec jekyll build
 
@@ -38,3 +45,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           cname: bruno.foundation
+
+env:
+  JEKYLL_ENV: production
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
