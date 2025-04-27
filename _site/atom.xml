@@ -2,9 +2,9 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
  <title>Foundation</title>
- <link href="https://bruno.foundation/lanyon/atom.xml" rel="self"/>
- <link href="https://bruno.foundation/lanyon/"/>
- <updated>2025-04-27T00:25:31-03:00</updated>
+ <link href="https://bruno.foundation/atom.xml" rel="self"/>
+ <link href="https://bruno.foundation/"/>
+ <updated>2025-04-27T00:29:59-03:00</updated>
  <id>https://bruno.foundation</id>
  <author>
    <name>Bruno da Gama Porciuncula</name>
@@ -16,7 +16,7 @@
    <title>The Box Pattern: A Deep Dive into Swift's Hidden Gem</title>
    <link href="https://bruno.foundation/swift/programming/2025/04/13/the-box/"/>
    <updated>2025-04-13T00:00:00-03:00</updated>
-   <id>https://bruno.foundation/lanyon/swift/programming/2025/04/13/the-box</id>
+   <id>https://bruno.foundation/swift/programming/2025/04/13/the-box</id>
    <content type="html">&lt;p align=&quot;center&quot; style=&quot;width: 100%;&quot;&gt;
   &lt;img src=&quot;/public/img/box.webp&quot; alt=&quot;Dick In The Box&quot; style=&quot;width: 100%; height: auto;&quot; /&gt;
 &lt;/p&gt;

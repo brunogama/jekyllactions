@@ -1,1 +1,1 @@
-Sitemap: https://bruno.foundation/lanyon/sitemap.xml
+Sitemap: https://bruno.foundation/sitemap.xml
