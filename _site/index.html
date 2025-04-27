@@ -14,38 +14,47 @@
   </title>
 
   
-  <link rel="canonical" href="http://localhost:4000/">
+  <link rel="canonical" href="https://bruno.foundation/lanyon/">
   
 
-  <link rel="stylesheet" href="http://localhost:4000/public/css/poole.css">
-  <link rel="stylesheet" href="http://localhost:4000/public/css/syntax.css">
-  <link rel="stylesheet" href="http://localhost:4000/public/css/lanyon.css">
+  <link rel="stylesheet" href="https://bruno.foundation/lanyon/public/css/poole.css">
+  <link rel="stylesheet" href="https://bruno.foundation/lanyon/public/css/syntax.css">
+  <link rel="stylesheet" href="https://bruno.foundation/lanyon/public/css/lanyon.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
 
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:4000/public/apple-touch-icon-precomposed.png">
-  <link rel="shortcut icon" href="http://localhost:4000/public/favicon.ico">
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://bruno.foundation/lanyon/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="https://bruno.foundation/lanyon/public/favicon.ico">
 
-  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
-  <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Foundation" />
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="https://bruno.foundation/lanyon/atom.xml">
+  <link type="application/atom+xml" rel="alternate" href="https://bruno.foundation/lanyon/feed.xml" title="Foundation" />
   
   <!-- Begin Jekyll SEO tag v2.8.0 -->
-<meta name="generator" content="Jekyll v4.3.4" />
+<meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="Home" />
 <meta name="author" content="Bruno da Gama Porciuncula" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="This is my personal website, where I share my thoughts and crazy Swift ideas." />
 <meta property="og:description" content="This is my personal website, where I share my thoughts and crazy Swift ideas." />
-<link rel="canonical" href="http://localhost:4000/" />
-<meta property="og:url" content="http://localhost:4000/" />
+<link rel="canonical" href="https://bruno.foundation/lanyon/" />
+<meta property="og:url" content="https://bruno.foundation/lanyon/" />
 <meta property="og:site_name" content="Foundation" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Home" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Bruno da Gama Porciuncula","url":"https://twitter.com/brunogama"},"description":"This is my personal website, where I share my thoughts and crazy Swift ideas.","headline":"Home","name":"Foundation","url":"http://localhost:4000/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Bruno da Gama Porciuncula","url":"https://twitter.com/brunogama"},"description":"This is my personal website, where I share my thoughts and crazy Swift ideas.","headline":"Home","name":"Foundation","url":"https://bruno.foundation/lanyon/"}</script>
 <!-- End Jekyll SEO tag -->
 
 
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'G-MJ3E2VC6SJ', 'auto');
+    ga('send', 'pageview');
+  </script>
   
 </head>
 
@@ -63,7 +72,7 @@
   </div>
 
   <nav class="sidebar-nav">
-    <a class="sidebar-nav-item active" href="http://localhost:4000/">Home</a>
+    <a class="sidebar-nav-item active" href="https://bruno.foundation/lanyon/">Home</a>
 
     
 
@@ -79,8 +88,10 @@
     
       
         
-          <a class="sidebar-nav-item" href="http://localhost:4000/about/">About Me</a>
+          <a class="sidebar-nav-item" href="https://bruno.foundation/lanyon/about/">About Me</a>
         
+      
+    
       
     
       
@@ -109,7 +120,7 @@
       <div class="masthead">
         <div class="container">
           <h3 class="masthead-title">
-            <a href="/" title="Home">Foundation</a>
+            <a href="/lanyon/" title="Home">Foundation</a>
             <small>A collection of thougts and crazy Swift ideas</small>
           </h3>
         </div>
@@ -120,7 +131,7 @@
   
   <div class="post">
     <h1 class="post-title">
-      <a href="http://localhost:4000/swift/programming/2025/04/13/the-box/">
+      <a href="https://bruno.foundation/lanyon/swift/programming/2025/04/13/the-box/">
         The Box Pattern: A Deep Dive into Swift's Hidden Gem
       </a>
     </h1>
@@ -171,8 +182,8 @@
 
 <p>Well, Swift 5.9 introduced a new feature called Parameter Packs. Parameter Packs are really powerful and useful. And somehow they introduced a new kind of box I like to call the “heterogeneous box.” For people who are not familiar with the concept of Parameter Packs, they work like variadic generics. Let’s see the example below:</p>
 
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">func</span> <span class="o">&lt;</span><span class="k">each</span> <span class="kt">P</span><span class="o">&gt;</span><span class="nf">packs</span><span class="p">(</span><span class="nv">argument</span><span class="p">:</span> <span class="k">repeat</span> <span class="k">each</span> <span class="kt">P</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">P</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">return</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="n">argument</span><span class="p">)</span>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">func</span> <span class="o">&lt;</span><span class="n">each</span> <span class="kt">P</span><span class="o">&gt;</span><span class="nf">packs</span><span class="p">(</span><span class="nv">argument</span><span class="p">:</span> <span class="k">repeat</span> <span class="n">each</span> <span class="kt">P</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">P</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">return</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="n">argument</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -200,21 +211,21 @@
   <span class="kd">func</span> <span class="nf">evaluate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Payload</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="n">query</span><span class="o">&lt;</span><span class="k">each</span> <span class="kt">Payload</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">item</span><span class="p">:</span> <span class="k">repeat</span> <span class="kt">Request</span><span class="o">&lt;</span><span class="k">each</span> <span class="kt">Payload</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Payload</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nf">return</span> <span class="p">(</span><span class="nf">repeat</span> <span class="p">(</span><span class="k">each</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="nf">evaluate</span><span class="p">())</span>
+<span class="kd">func</span> <span class="n">query</span><span class="o">&lt;</span><span class="n">each</span> <span class="kt">Payload</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">item</span><span class="p">:</span> <span class="k">repeat</span> <span class="kt">Request</span><span class="o">&lt;</span><span class="n">each</span> <span class="kt">Payload</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Payload</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nf">return</span> <span class="p">(</span><span class="nf">repeat</span> <span class="p">(</span><span class="n">each</span> <span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="nf">evaluate</span><span class="p">())</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
 <p>Okay, but where is the new fancy HeterogeneousBox? Let’s check it out:</p>
 
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">HeterogeneousBox</span><span class="o">&lt;</span><span class="k">each</span> <span class="kt">Value</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">value</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">)</span>
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">struct</span> <span class="kt">HeterogeneousBox</span><span class="o">&lt;</span><span class="n">each</span> <span class="kt">Value</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">value</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">)</span>
     
-    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="n">value</span><span class="p">)</span>
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="n">value</span><span class="p">)</span>
     <span class="p">}</span>
     
-    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">tuple</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">tuple</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">))</span> <span class="p">{</span>
         <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">tuple</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -229,20 +240,20 @@
 <p>However, there are some tricks that can make this possible. I believe in Swift 5.4 Apple introduced a feature called <code class="language-plaintext highlighter-rouge">@dynamicMemberLookup</code> that allows one to look for properties or keypaths at runtime; it was extremely useful when Apple was working with Google and TensorFlow. By adding this annotation, we’re able to access <code class="language-plaintext highlighter-rouge">tuple.0</code> (if it exists, remembering it is runtime). Here is the implementation:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">@dynamicMemberLookup</span>
-<span class="kd">struct</span> <span class="kt">HeterogeneousBox</span><span class="o">&lt;</span><span class="k">each</span> <span class="kt">Value</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">value</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">)</span>
+<span class="kd">struct</span> <span class="kt">HeterogeneousBox</span><span class="o">&lt;</span><span class="n">each</span> <span class="kt">Value</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">value</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">)</span>
     
-    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="n">value</span><span class="p">)</span>
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">value</span><span class="p">:</span> <span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="n">value</span><span class="p">)</span>
     <span class="p">}</span>
     
-    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">tuple</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nf">init</span><span class="p">(</span><span class="n">_</span> <span class="nv">tuple</span><span class="p">:</span> <span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">))</span> <span class="p">{</span>
         <span class="k">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">tuple</span>
     <span class="p">}</span>
     
     <span class="c1">// By using WritableKeyPath we can access the value of the tuple and set a new one (of the same type)</span>
     <span class="kd">subscript</span><span class="o">&lt;</span><span class="kt">Output</span><span class="o">&gt;</span><span class="p">(</span>
-        <span class="n">dynamicMember</span> <span class="nv">keyPath</span><span class="p">:</span> <span class="kt">WritableKeyPath</span><span class="o">&lt;</span><span class="p">(</span><span class="k">repeat</span> <span class="k">each</span> <span class="kt">Value</span><span class="p">),</span> <span class="kt">Output</span><span class="o">&gt;</span>
+        <span class="n">dynamicMember</span> <span class="nv">keyPath</span><span class="p">:</span> <span class="kt">WritableKeyPath</span><span class="o">&lt;</span><span class="p">(</span><span class="k">repeat</span> <span class="n">each</span> <span class="kt">Value</span><span class="p">),</span> <span class="kt">Output</span><span class="o">&gt;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Output</span> <span class="p">{</span>
         <span class="k">get</span> <span class="p">{</span> <span class="n">value</span><span class="p">[</span><span class="nv">keyPath</span><span class="p">:</span> <span class="n">keyPath</span><span class="p">]</span> <span class="p">}</span>
         <span class="k">set</span> <span class="p">{</span> <span class="n">value</span><span class="p">[</span><span class="nv">keyPath</span><span class="p">:</span> <span class="n">keyPath</span><span class="p">]</span> <span class="o">=</span> <span class="n">newValue</span> <span class="p">}</span>
@@ -289,6 +300,6 @@
 
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
 
-    <script src='/public/js/script.js'></script>
+    <script src='/lanyon/public/js/script.js'></script>
   </body>
 </html>
