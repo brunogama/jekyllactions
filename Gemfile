@@ -1,16 +1,14 @@
 source "https://rubygems.org"
 
-# Use Jekyll 3.9 to be compatible with the Lanyon theme
-gem "jekyll", "~> 3.9"
+# Use GitHub Pages
+gem "github-pages", group: :jekyll_plugins
 
-# Theme
-gem "jekyll-theme-lanyon", "~> 1.1"
-
-# Required for Jekyll 3.9 with newer Ruby versions
+# Required for Jekyll with newer Ruby versions
 gem "kramdown-parser-gfm"
-
-# Required for Ruby 3+
 gem "webrick"
+
+# Add remote theme plugin
+gem "jekyll-remote-theme"
 
 # Jekyll plugins
 group :jekyll_plugins do
@@ -28,6 +26,3 @@ end
 
 # Performance-booster for watching directories on Windows
 gem "wdm", "~> 0.1.1", platforms: [:mingw, :x64_mingw, :mswin]
-
-# Match your .ruby-version file
-ruby "3.3.6"
