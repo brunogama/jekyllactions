@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0    # Fetch all history for all tags and branches
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -27,11 +29,14 @@ jobs:
       - name: Install dependencies
         run: bundle install
 
+      - name: Remove .jekyll-cache
+        run: rm -rf .jekyll-cache || true
+
       - name: Clean Jekyll cache
         run: bundle exec jekyll clean
 
       - name: Build site
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build --verbose
         env:
           JEKYLL_ENV: production
 
@@ -40,4 +45,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
+          force_orphan: true
           cname: bruno.foundation

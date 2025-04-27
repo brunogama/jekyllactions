@@ -3,7 +3,7 @@ title:               Foundation
 tagline:             'A collection of thougts and crazy Swift ideas'
 description:         'This is my personal website, where I share my thoughts and crazy Swift ideas.'
 url:                 https://bruno.foundation
-baseurl:             '/lanyon'
+baseurl:             ''
 paginate:            5
 permalink:           pretty
 
