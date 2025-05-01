@@ -4,7 +4,7 @@
  <title>Foundation</title>
  <link href="https://bruno.foundation/atom.xml" rel="self"/>
  <link href="https://bruno.foundation/"/>
- <updated>2025-04-27T11:39:36-03:00</updated>
+ <updated>2025-04-30T21:16:45-03:00</updated>
  <id>https://bruno.foundation</id>
  <author>
    <name>Bruno da Gama Porciuncula</name>
@@ -61,7 +61,7 @@
 
 &lt;p&gt;Well, Swift 5.9 introduced a new feature called Parameter Packs. Parameter Packs are really powerful and useful. And somehow they introduced a new kind of box I like to call the “heterogeneous box.” For people who are not familiar with the concept of Parameter Packs, they work like variadic generics. Let’s see the example below:&lt;/p&gt;
 
-&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;packs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;packs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;nf&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;repeat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;each&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
